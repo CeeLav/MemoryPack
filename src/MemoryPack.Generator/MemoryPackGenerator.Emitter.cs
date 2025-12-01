@@ -89,6 +89,7 @@ partial class MemoryPackGenerator
 
 using System;
 using MemoryPack;
+using Astrum.CommonBase;
 ");
 
         var ns = typeMeta.Symbol.ContainingNamespace;
@@ -420,6 +421,12 @@ partial {{classOrStructOrRecord}} {{TypeName}} : IMemoryPackable<{{TypeName}}>{{
     {{staticMemoryPackableMethod}}Deserialize(ref MemoryPackReader reader, {{scopedRef}} {{TypeName}}{{nullable}} value)
     {
 {{OnDeserializing.Select(x => "        " + x.Emit()).NewLine()}}
+{{(!IsValueType ? $$"""
+        if (value == null)
+        {
+            value = ({{TypeName}})global::Astrum.CommonBase.ObjectPool.Instance.Fetch(typeof({{TypeName}}));
+        }
+""" : "")}}
 {{deserializeBody}}
     END:
 {{OnDeserialized.Select(x => "        " + x.Emit()).NewLine()}}
